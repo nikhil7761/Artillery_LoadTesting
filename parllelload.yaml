@@ -1,0 +1,35 @@
+config:
+  target: http://172.30.1.24:1001  # Default target (this can be set to one of the targets, or left out if not needed)
+  phases:
+    - duration: 60
+      arrivalRate: 1
+      rampTo: 600
+      name: Warm up phase
+    - duration: 60
+      arrivalRate: 5
+      rampTo: 6000
+      name: Ramp up load
+    - duration: 60
+      arrivalRate: 10
+      rampTo: 60000
+      name: Spike phase
+  plugins:
+    ensure: {}
+    apdex: {}
+    metrics-by-endpoint: {}
+  apdex:
+    threshold: 100
+  ensure:
+    thresholds:
+      - http.response_time.p99: 100
+      - http.response_time.p95: 75
+scenarios:
+  - flow:
+      - parallel:
+          - get:
+              url: http://172.30.1.24:1001
+          - get:
+              url: http://172.30.1.24:1005
+          - get:
+              url: http://172.30.1.24:90
+        count: 100
